@@ -1,14 +1,9 @@
 #ifndef MONTY_H
 #define MONTY_H
-
-#include <stdio.h>
+#define _GNU_SOURCE
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
-#include <unistd.h>
-
-#define STACK 0
-#define QUEUE 1
-
 /**
  * struct stack_s - doubly linked list representation of a stack (or queue)
  * @n: integer
@@ -16,17 +11,53 @@
  * @next: points to the next element of the stack (or queue)
  *
  * Description: doubly linked list node structure
- * for stack, queues, LIFO, FIFO Holberton project
+ * for stack, queues, LIFO, FIFO
  */
 typedef struct stack_s
 {
-        int n;
-        struct stack_s *prev;
-        struct stack_s *next;
+	int n;
+	struct stack_s *prev;
+	struct stack_s *next;
 } stack_t;
 
+
 /**
- * struct instruction_s - opcoode and its function
+ * struct setting - representation of  heap
+ *@type: type of list stack or queue
+ *@len: len of list
+ *@number_args: number of args after parsing
+ *@line_number: line of executed command
+ *@arguments_: arguments after parsing
+ *@cpy_line: cpy of line  after getline
+ *@file_: file executed
+ *@buffer_line: line allocated by getline
+ *@head_list: head of the list
+ *@tail_list: tail of the list
+ * Description: doubly linked list node structure
+ * for stack, queues, LIFO, FIFO
+ */
+typedef struct setting
+{
+	char *type;
+	size_t len;
+	unsigned int number_args;
+	unsigned int line_number;
+	/*memory free*/
+	char ***arguments_;
+	char *cpy_line;
+	FILE *file_;
+	char *buffer_line;
+	int state; /* 0 stack 1 queue*/
+	/*head of the list*/
+	stack_t **head_list, **tail_list;
+} setting_t;
+
+extern setting_t info;
+setting_t info;
+
+
+/**
+ * struct instruction_s - opcode and its function
  * @opcode: the opcode
  * @f: function to handle the opcode
  *
@@ -35,62 +66,104 @@ typedef struct stack_s
  */
 typedef struct instruction_s
 {
-        char *opcode;
-        int (*f)(stack_t **stack, unsigned int line_number);
+	char *opcode;
+	void (*f)(stack_t **stack, unsigned int line_number);
 } instruction_t;
 
-/**
- * struct command_arg - a command and its argument (used in parsing and push)
- * @command: a command/opcode
- * @arg: an integer argument of the command (used for push)
- *
- * Description: if command is push, arg is pushed onto the stack/queue
- * pushing is the only time this is used
- */
-typedef struct command_arg
-{
-	char *command;
-	int arg;
-} command_arg;
 
-extern unsigned int line_number;
+/* commands.c */
+void print_all(stack_t **stack, unsigned int line_number);
+void push(stack_t **stack, unsigned int line_number);
+void pop(stack_t **head, unsigned int line_number);
+void pint(stack_t **head, unsigned int line_number);
+void swap(stack_t **head, unsigned int line_number);
 
-int (*get_func(char *command))(stack_t **stack, unsigned int line_number);
+/*commands_2.c*/
+void add(stack_t **head, unsigned int line_number);
+void nop(stack_t **head, unsigned int line_number);
+void sub(stack_t **head, unsigned int line_number);
+void div_(stack_t **head, unsigned int line_number);
+void mul_(stack_t **head, unsigned int line_number);
 
-command_arg *parse_line(char *line);
+/*commands_3.c*/
+void mod_(stack_t **head, unsigned int line_number);
+void pchar_(stack_t **head, unsigned int line_number);
+void print_string(stack_t **head, unsigned int line_number);
+void rot_(stack_t **head, unsigned int line_number);
+/* helpers.c */
+int to_number(int *number);
+int check_argument(char *opcode);
 
-void free_stack(stack_t *stack);
+/*execute*/
+void execute_file(void);
+void execute_line_(void);
+void initilize_heap_(void);
 
-int push_to_stack(stack_t **stack, int n, int s_or_q);
 
-int print_all(stack_t **stack, unsigned int line_number);
+/*node.c*/
+stack_t *new_node_(int n);
+void free_dlistint(void);
+stack_t *add_dnodeint_end(stack_t **head, int n);
 
-int print_int(stack_t **stack, unsigned int line_number);
 
-int pop_int(stack_t **stack, unsigned int line_number);
+/* errors.c */
+void malloc_error(void);
+void invalid_args(void);
+void pint_error(void);
+void number_arguments_error(void);
+void file_error(char *msg);
 
-int swap_ints(stack_t **stack, unsigned int line_number);
+/*errors_2.c*/
+void unknown_ins(void);
+void pop_error(void);
+void swap_error(void);
+void add_error(void);
+void sub_error(void);
 
-int add_ints(stack_t **stack, unsigned int line_number);
+/*error_3.c*/
+void div_error(void);
+void div_error_2(void);
+void mul_error(void);
+void mod_error(void);
+void pchar_error_2(void);
 
-int no_op(stack_t **stack, unsigned int line_number);
+/*error_4.c*/
+void pchar_error(void);
 
-int sub_ints(stack_t **stack, unsigned int line_number);
+/* utils.c*/
+int _isspace(int c);
+int _is_empty(char *s);
+char *ft_strdup(char *src);
 
-int div_ints(stack_t **stack, unsigned int line_number);
+/*memory_clean.c*/
+void free_(char **parsed_buffer);
+void free_2_(char ***parsed_buffer);
+char **mall_c(int a);
+void free_all(int, int, int, int, int);
+void fill_info(char ***, FILE **, char **, char **);
 
-int  mul_ints(stack_t **stack, unsigned int line_number);
+/* get_command.c*/
+void (*get_format(char *formato))(stack_t **, unsigned int);
 
-int mod_ints(stack_t **stack, unsigned int line_number);
+/*read_line.c*/
+void parser(char *buffer_line, char **pieces);
 
-int print_char(stack_t **stack, unsigned int line_number);
+/*stack_2.c*/
+void s_sub(stack_t **head);
+void s_div(stack_t **head);
+void s_mul(stack_t **head);
+void s_mod(stack_t **head);
+void s_pchar(stack_t **head);
 
-int print_string(stack_t **stack, unsigned int line_number);
+void s_print_string(stack_t **head);
 
-int rotate_left(stack_t **stack, unsigned int line_number);
+/*queue_2.c*/
+void q_sub(stack_t **head);
+void q_div(stack_t **head);
+void q_mul(stack_t **head);
+void q_mod(stack_t **head);
+void q_pchar(stack_t **head);
+void q_print_string(stack_t **head);
 
-int rotate_right(stack_t **stack, unsigned int line_number);
 
-int failure(stack_t **stack, unsigned int line_number);
-
-#endif
+#endif /* MONTY_H */

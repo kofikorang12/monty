@@ -1,6 +1,5 @@
 #include "monty.h"
 #include "stack.h"
-
 /**
  *s_add - add command
  *@head: head of the list
